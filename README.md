@@ -3,7 +3,7 @@ Class for use imgur API.
 
 ```
   $imgur = new Imgur;
-  $imgur->clientId = '8847f1a6a583d5e';
+  $imgur->clientId = 'code';
   $filename = 'images/browserling.png';
   $handle = fopen($filename, "r");
   $data = fread($handle, filesize($filename));
