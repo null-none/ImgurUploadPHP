@@ -1,13 +1,16 @@
 # ImgurUploadPHP
-Class for use imgur API.
+
+PHP class for quickly uploading images to Imgur.
 
 ```
-  $imgur = new Imgur;
-  $imgur->clientId = 'code';
-  $filename = 'images/browserling.png';
-  $handle = fopen($filename, "r");
-  $data = fread($handle, filesize($filename));
-  $params   = array('image' => base64_encode($data));
-  $result = $imgur->uploadImage($params);
-  print_r($result);
+$imgur = new ImgurUploader;
+$imgur->setClientId('clientID');
+
+$result = $imgur->uploadImage('images/browserling.png');
+if (!$result) {
+  $error = $imgur->getError();
+  print "Error: $error";
+}
+
+print_r($result);
 ```
