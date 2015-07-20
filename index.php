@@ -5,6 +5,7 @@ class ImgurUploader {
   private $error;
 
   const TIMEOUT = 30;
+  const UPLOAD_URL = 'https://api.imgur.com/3/image.json';
  
   public function setClientId($clientId) {
     $this->clientId = $clientId;
@@ -36,17 +37,15 @@ class ImgurUploader {
       return FALSE;
     }
 
-    $data = file_get_contents($filename);
-    if (!$data) {
+    $image = file_get_contents($filename);
+    if ($image === FALSE) {
       fclose($handle);
       $this->setError("Failed reading contents of '$filename'");
       return FALSE;
     }
     fclose($handle);
 
-    return $this->curlUpload([
-      'image' => base64_encode($data)
-    ]);
+    return $this->curlUpload(base64_encode($image));
   }
 
   public function uploadImageBase64($imageBase64) {
@@ -55,17 +54,10 @@ class ImgurUploader {
       return FALSE;
     }
 
-    return $this->curlUpload([
-      'image' => $imageBase64
-    ]);
+    return $this->curlUpload($imageBase64);
   }
 
-  private function curlUpload($params) {
-    $url = 'https://api.imgur.com/3/image.json';
-    return $this->curlQuery($params, $url);
-  }   
-
-  private function curlQuery($params, $url) {
+  private function curlUpload($imageBase64) {
     $curl = curl_init();
     if (!$curl) {
       $errstr = $this->getCurlStrError($curl);
@@ -73,7 +65,7 @@ class ImgurUploader {
       return FALSE;
     }
 
-    $ret = curl_setopt($curl, CURLOPT_URL, $url);
+    $ret = curl_setopt($curl, CURLOPT_URL, self::UPLOAD_URL);
     if (!$ret) {
       $errstr = $this->getCurlStrError($curl);
       $this->setError("Failed setting CURLOPT_URL: $errstr");
@@ -108,7 +100,9 @@ class ImgurUploader {
       return FALSE;
     }
 
-    $ret = curl_setopt($curl, CURLOPT_POSTFIELDS, $params);
+    $ret = curl_setopt($curl, CURLOPT_POSTFIELDS, [
+      'image' => $imageBase64
+    ]);
     if (!$ret) {
       $errstr = $this->getCurlStrError($curl);
       $this->setError("Failed setting CURLOPT_POSTFIELDS: $errstr");
@@ -142,10 +136,16 @@ $imgur->setClientId('clientID');
 $result = $imgur->uploadImage('browserling.png');
 if (!$result) {
   $error = $imgur->getError();
-  print "Error: $error";
+  print "Upload failed. Error: $error";
 }
-
-print_r($result);
+else if ($result['status'] != 200) {
+  print "Upload failed. Error: " . $result['data']['error'];
+  print_r($result);
+}
+else {
+  print "Upload successful!";
+  print_r($result);
+}
 
 ?>
 

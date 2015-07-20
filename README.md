@@ -2,15 +2,20 @@
 
 PHP class for quickly uploading images to Imgur.
 
-```
+``` php
 $imgur = new ImgurUploader;
 $imgur->setClientId('clientID');
-
-$result = $imgur->uploadImage('images/browserling.png');
+$result = $imgur->uploadImage('browserling.png');
 if (!$result) {
   $error = $imgur->getError();
-  print "Error: $error";
+  print "Upload failed. Error: $error";
 }
-
-print_r($result);
+else if ($result['status'] != 200) {
+  print "Upload failed. Error: " . $result['data']['error'];
+  print_r($result);
+}
+else {
+  print "Upload successful!";
+  print_r($result);
+}
 ```
